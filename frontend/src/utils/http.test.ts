@@ -48,4 +48,25 @@ describe('authenticated HTTP client', () => {
     })
     expect(unauthorizedHandler).toHaveBeenCalledOnce()
   })
+
+  it('preserves authentication error details without invoking the unauthorized handler', async () => {
+    const unauthorizedHandler = vi.fn()
+    const adapter: AxiosAdapter = async (config) => {
+      const response: AxiosResponse = {
+        data: { detail: '用户名或密码错误' },
+        status: 401,
+        statusText: 'Unauthorized',
+        headers: {},
+        config,
+      }
+      throw new AxiosError('Request failed', 'ERR_BAD_REQUEST', config, undefined, response)
+    }
+
+    setUnauthorizedHandler(unauthorizedHandler)
+
+    await expect(http.post('/api/auth/login', {}, { adapter })).rejects.toMatchObject({
+      message: '用户名或密码错误',
+    })
+    expect(unauthorizedHandler).not.toHaveBeenCalled()
+  })
 })

@@ -51,8 +51,8 @@ http.interceptors.response.use(
     const url = error.config?.url ?? ''
     const isAuthRequest = /\/auth\/(login|register)\/?(?:\?|$)/.test(url)
 
-    if (status === 401) {
-      if (!isAuthRequest) unauthorizedHandler()
+    if (status === 401 && !isAuthRequest) {
+      unauthorizedHandler()
       return Promise.reject(new ApiError('登录已过期，请重新登录', status, error.response?.data))
     }
 
