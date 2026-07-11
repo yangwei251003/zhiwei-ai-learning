@@ -11,5 +11,11 @@
 @keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
 @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
 @keyframes successPop{0%{transform:scale(.8);filter:hue-rotate(0)}65%{transform:scale(1.12);filter:hue-rotate(28deg)}100%{transform:scale(1);filter:hue-rotate(0)}}
+@keyframes constellation-drift{from{background-position:0 0}to{background-position:76px -38px}}
+@keyframes node-pulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.05);opacity:1}}
+@keyframes auth-shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes mascot-celebrate{0%{transform:translateX(-50%) scale(.86) rotate(-4deg)}65%{transform:translateX(-50%) scale(1.08) rotate(3deg)}100%{transform:translateX(-50%) scale(1) rotate(0)}}
+@keyframes success-curtain{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0)}}
 .animate-fade-up{animation:fadeInUp .3s ease both}.animate-scale{animation:fadeInScale .24s ease both}.animate-float{animation:float 5s ease-in-out infinite}.animate-glow{animation:pulseGlow 2.6s ease-in-out infinite}.animate-breathe{animation:breathe 4s ease-in-out infinite}.animate-success{animation:successPop .42s cubic-bezier(.2,.8,.2,1) both}
+.auth-shake{animation:auth-shake .36s ease both}.success-curtain{animation:success-curtain .52s ease-out both}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
