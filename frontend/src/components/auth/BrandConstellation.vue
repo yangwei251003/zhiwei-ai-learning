@@ -23,6 +23,7 @@ const mascotSource = computed(() => props.celebrating
       <span class="constellation-grid" />
       <span v-for="orbit in 3" :key="orbit" :class="`constellation-orbit orbit-${orbit}`" />
       <i v-for="star in 18" :key="star" :class="`constellation-star star-${star}`" />
+      <i v-for="star in 12" :key="`focus-${star}`" :class="`focus-star focus-star-${star}`" />
     </div>
 
     <ul class="constellation-nodes" aria-label="智能学习环节">

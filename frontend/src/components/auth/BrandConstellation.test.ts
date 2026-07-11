@@ -19,6 +19,7 @@ describe('BrandConstellation', () => {
   it('enhances focus without replacing the structure', async () => {
     const wrapper = mount(BrandConstellation, { props: { focused: false } })
     expect(wrapper.classes()).not.toContain('is-focused')
+    expect(wrapper.findAll('.focus-star').length).toBeGreaterThan(0)
 
     await wrapper.setProps({ focused: true })
     expect(wrapper.classes()).toContain('is-focused')
