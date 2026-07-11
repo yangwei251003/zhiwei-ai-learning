@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { Hide, View } from '@element-plus/icons-vue'
 import { ElTooltip } from 'element-plus'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   loading?: boolean
   serverError?: string
 }>(), {
@@ -22,6 +22,11 @@ const remember = ref(false)
 const passwordVisible = ref(false)
 const usernameError = ref('')
 const passwordError = ref('')
+
+function describedBy(fieldError: string, fieldId: string): string | undefined {
+  const ids = [fieldError ? fieldId : '', props.serverError ? 'login-server-error' : ''].filter(Boolean)
+  return ids.length ? ids.join(' ') : undefined
+}
 
 function submit() {
   usernameError.value = username.value.trim() ? '' : '请输入用户名'
@@ -51,7 +56,7 @@ function handleFocusOut(event: FocusEvent) {
           required
           :disabled="loading"
           :aria-invalid="Boolean(usernameError || serverError)"
-          :aria-describedby="usernameError || serverError ? 'login-username-error login-server-error' : undefined"
+          :aria-describedby="describedBy(usernameError, 'login-username-error')"
           @input="usernameError = ''"
         >
         <p v-if="usernameError" id="login-username-error" class="field-error" role="alert">{{ usernameError }}</p>
@@ -69,7 +74,7 @@ function handleFocusOut(event: FocusEvent) {
             required
             :disabled="loading"
             :aria-invalid="Boolean(passwordError || serverError)"
-            :aria-describedby="passwordError || serverError ? 'login-password-error login-server-error' : undefined"
+            :aria-describedby="describedBy(passwordError, 'login-password-error')"
             @input="passwordError = ''"
           >
           <ElTooltip :content="passwordVisible ? '隐藏密码' : '显示密码'" placement="top">

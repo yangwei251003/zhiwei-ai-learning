@@ -37,4 +37,26 @@ describe('LoginForm', () => {
     expect(wrapper.get('button[type="submit"]').attributes('disabled')).toBeDefined()
     expect(wrapper.get('[data-test="password-toggle"]').attributes('disabled')).toBeDefined()
   })
+
+  it('only describes inputs with error elements that are actually rendered', async () => {
+    const wrapper = mount(LoginForm)
+    const username = () => wrapper.get('input[autocomplete="username"]')
+
+    expect(username().attributes('aria-describedby')).toBeUndefined()
+
+    await wrapper.get('form').trigger('submit')
+    expect(username().attributes('aria-describedby')).toBe('login-username-error')
+    expect(wrapper.find('#login-username-error').exists()).toBe(true)
+    expect(wrapper.find('#login-server-error').exists()).toBe(false)
+
+    await wrapper.setProps({ serverError: '账号或密码错误' })
+    await username().setValue('learner')
+    expect(username().attributes('aria-describedby')).toBe('login-server-error')
+    expect(wrapper.find('#login-username-error').exists()).toBe(false)
+    expect(wrapper.find('#login-server-error').exists()).toBe(true)
+
+    await username().setValue('')
+    await wrapper.get('form').trigger('submit')
+    expect(username().attributes('aria-describedby')).toBe('login-username-error login-server-error')
+  })
 })
