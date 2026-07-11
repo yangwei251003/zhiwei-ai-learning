@@ -1,0 +1,15 @@
+@keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeInScale{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgb(99 102 241 / 0%)}50%{box-shadow:0 0 24px 5px rgb(99 102 241 / 22%)}}
+@keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-12px) rotate(1deg)}}
+@keyframes typingCursor{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes countUp{from{opacity:.25;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes particleDrift{from{background-position:0 0}to{background-position:160px -120px}}
+@keyframes shake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+@keyframes successPop{0%{transform:scale(.8);filter:hue-rotate(0)}65%{transform:scale(1.12);filter:hue-rotate(28deg)}100%{transform:scale(1);filter:hue-rotate(0)}}
+.animate-fade-up{animation:fadeInUp .3s ease both}.animate-scale{animation:fadeInScale .24s ease both}.animate-float{animation:float 5s ease-in-out infinite}.animate-glow{animation:pulseGlow 2.6s ease-in-out infinite}.animate-breathe{animation:breathe 4s ease-in-out infinite}.animate-success{animation:successPop .42s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
