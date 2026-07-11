@@ -57,6 +57,26 @@ img { display: block; max-width: 100%; }
 .login-heading > p:last-child { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
 .login-eyebrow { margin: 0; color: var(--brand-mid); font-size: 12px; font-weight: 700; letter-spacing: 0; }
 .login-form fieldset { display: grid; gap: 19px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.register-form > fieldset { display: grid; gap: 15px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.register-form > fieldset:disabled { opacity: .7; }
+.register-panel .login-heading { margin-bottom: 22px; }
+.major-field { position: relative; }
+.major-options { position: absolute; z-index: 5; top: calc(100% - 1px); right: 0; left: 0; max-height: 190px; margin: 0; padding: 5px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-raised); box-shadow: var(--shadow-sm); list-style: none; }
+.major-options li { padding: 9px 10px; border-radius: 5px; color: var(--ink); cursor: pointer; }
+.major-options li:hover, .major-options li.active { background: color-mix(in srgb, var(--brand-mid) 11%, transparent); }
+.learning-style { min-width: 0; margin: 0; padding: 0; border: 0; }
+.learning-style legend { margin-bottom: 8px; color: var(--ink); font-size: 14px; font-weight: 650; }
+.learning-style legend span { color: var(--muted); font-size: 12px; font-weight: 400; }
+.style-options { display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden; border: 1px solid var(--line); border-radius: 8px; }
+.style-options label { position: relative; min-width: 0; border-right: 1px solid var(--line); cursor: pointer; }
+.style-options label:last-child { border-right: 0; }
+.style-options input { position: absolute; opacity: 0; }
+.style-options span { display: grid; place-items: center; min-height: 40px; padding: 4px; color: var(--muted); font-size: 13px; text-align: center; }
+.style-options input:checked + span { color: var(--paper); background: var(--brand-mid); }
+.style-options input:focus-visible + span { outline: 2px solid var(--action); outline-offset: -3px; }
+.profile-pending { display: grid; gap: 14px; padding: 20px 0 4px; }
+.profile-pending strong { font-size: 20px; }
+.profile-pending p { margin: 0; color: var(--muted); line-height: 1.6; }
 .login-form fieldset:disabled { opacity: .7; }
 .auth-field { display: grid; gap: 8px; }
 .auth-field label { color: var(--ink); font-size: 14px; font-weight: 650; }
@@ -80,6 +100,7 @@ img { display: block; max-width: 100%; }
 .auth-switch a { color: var(--brand-mid); font-weight: 700; text-underline-offset: 3px; }
 .login-panel > .success-curtain { position: absolute; inset: -18px; z-index: 4; display: grid; place-content: center; gap: 7px; border-radius: 8px; color: var(--paper); background: var(--brand-deep); text-align: center; }
 .success-curtain strong { color: var(--action); font-size: 27px; }
+.register-panel > .success-curtain strong { max-width: 390px; padding-inline: 18px; font-size: 22px; line-height: 1.5; }
 .success-curtain span { color: rgb(244 247 236 / 76%); font-size: 14px; }
 
 /* Compatibility for the existing workbench while its feature UI evolves. */
@@ -112,4 +133,7 @@ img { display: block; max-width: 100%; }
   .constellation-node { display: none; }
   .auth-brand img { width: 36px; height: 36px; }
   .auth-brand strong { font-size: 18px; }
+  .style-options { grid-template-columns: repeat(2, 1fr); }
+  .style-options label:nth-child(2) { border-right: 0; }
+  .style-options label:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
 }
