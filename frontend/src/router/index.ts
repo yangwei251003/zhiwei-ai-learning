@@ -7,7 +7,7 @@ import {
   type Router,
 } from 'vue-router'
 
-import { useUserStore } from '../stores/user'
+import { bindUserStoreToHttp, useUserStore } from '../stores/user'
 
 const testComponent: Component = { template: '<div />' }
 const routeComponent = (loader: () => Promise<Component>) =>
@@ -41,8 +41,10 @@ export function createAppRouter(): Router {
 }
 
 export function installAuthGuard(router: Router, pinia: Pinia): void {
+  const store = useUserStore(pinia)
+  bindUserStoreToHttp(store)
+
   router.beforeEach(async (to) => {
-    const store = useUserStore(pinia)
     if (!store.sessionRestored) await store.restoreSession()
 
     if (to.path === '/') return store.isAuthenticated ? '/workbench' : '/login'
