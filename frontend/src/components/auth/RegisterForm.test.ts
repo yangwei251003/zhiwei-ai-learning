@@ -63,6 +63,29 @@ describe('RegisterForm', () => {
     await combo.trigger('keydown', { key: 'Escape' })
   })
 
+  it('closes and clears the combobox for no matches and focusout', async () => {
+    const wrapper = mount(RegisterForm)
+    const combo = wrapper.get('[role="combobox"]')
+    await combo.setValue('工程'); await combo.trigger('keydown', { key: 'ArrowDown' })
+    expect(combo.attributes('aria-activedescendant')).toBeTruthy()
+    await combo.setValue('不存在专业')
+    expect(combo.attributes('aria-expanded')).toBe('false')
+    expect(combo.attributes('aria-activedescendant')).toBeUndefined()
+    await combo.setValue('工程'); await combo.trigger('keydown', { key: 'ArrowDown' })
+    await combo.trigger('blur', { relatedTarget: document.body })
+    expect(combo.attributes('aria-expanded')).toBe('false')
+    expect(combo.attributes('aria-activedescendant')).toBeUndefined()
+  })
+
+  it('keeps server errors global and asks the parent to clear them on edit', async () => {
+    const wrapper = mount(RegisterForm, { props: { serverError: '服务繁忙' } })
+    const username = wrapper.get('input[autocomplete="username"]')
+    expect(username.attributes('aria-invalid')).toBe('false')
+    expect(username.attributes('aria-describedby')).toBeUndefined()
+    await username.setValue('learner')
+    expect(wrapper.emitted('clear-error')).toHaveLength(1)
+  })
+
   it('disables every control while loading', () => {
     const wrapper = mount(RegisterForm, { props: { loading: true } })
     expect(wrapper.findAll('input').every((input) => input.attributes('disabled') !== undefined)).toBe(true)

@@ -78,4 +78,32 @@ describe('RegisterView', () => {
     await wrapper.get('[data-test="retry-profile"]').trigger('click'); await flushPromises()
     expect(saveProfile).toHaveBeenCalledTimes(2)
   })
+
+  it('clears a registration error when the form is edited', async () => {
+    register.mockRejectedValue(new Error('注册服务繁忙'))
+    const { wrapper } = await mounted()
+    wrapper.getComponent({ name: 'RegisterForm' }).vm.$emit('submit', payload); await flushPromises()
+    expect(wrapper.text()).toContain('注册服务繁忙')
+    wrapper.getComponent({ name: 'RegisterForm' }).vm.$emit('clear-error'); await wrapper.vm.$nextTick()
+    expect(wrapper.text()).not.toContain('注册服务繁忙')
+  })
+
+  it('does not navigate when unmounted during celebration', async () => {
+    register.mockResolvedValue({ profileSaved: true })
+    const { router, wrapper } = await mounted()
+    const replace = vi.spyOn(router, 'replace')
+    wrapper.getComponent({ name: 'RegisterForm' }).vm.$emit('submit', payload); await flushPromises()
+    wrapper.unmount(); await vi.advanceTimersByTimeAsync(420)
+    expect(replace).not.toHaveBeenCalled()
+  })
+
+  it('ignores a pending registration result after unmount', async () => {
+    let resolve!: (value: { profileSaved: boolean }) => void
+    register.mockReturnValue(new Promise((done) => { resolve = done }))
+    const { router, wrapper } = await mounted()
+    const replace = vi.spyOn(router, 'replace')
+    wrapper.getComponent({ name: 'RegisterForm' }).vm.$emit('submit', payload)
+    wrapper.unmount(); resolve({ profileSaved: true }); await flushPromises(); await vi.advanceTimersByTimeAsync(420)
+    expect(replace).not.toHaveBeenCalled()
+  })
 })

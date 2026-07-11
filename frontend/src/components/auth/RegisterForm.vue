@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<{ loading?: boolean; serverError?: string
   loading: false,
   serverError: '',
 })
-const emit = defineEmits<{ submit: [payload: RegistrationInput]; 'focus-change': [focused: boolean] }>()
+const emit = defineEmits<{ submit: [payload: RegistrationInput]; 'focus-change': [focused: boolean]; 'clear-error': [] }>()
 
 const majors = ['计算机科学与技术', '软件工程', '人工智能', '数据科学与大数据技术', '网络工程', '信息安全', '电子信息工程', '自动化', '数学与应用数学', '其他']
 const styles: { value: LearningStyle; label: string }[] = [
@@ -37,10 +37,14 @@ const filteredMajors = computed(() => majors.filter((item) => item.includes(majo
 const activeId = computed(() => open.value && activeIndex.value >= 0 ? `register-major-option-${activeIndex.value}` : undefined)
 
 function describedBy(error: string, ownId: string) {
-  const ids = [error ? ownId : '', props.serverError ? 'register-server-error' : ''].filter(Boolean)
-  return ids.length ? ids.join(' ') : undefined
+  return error ? ownId : undefined
 }
-function updateMajor() { majorError.value = ''; open.value = true; activeIndex.value = -1 }
+function edited(clear: () => void) { clear(); emit('clear-error') }
+function updateMajor() {
+  majorError.value = ''; activeIndex.value = -1
+  open.value = filteredMajors.value.length > 0
+  emit('clear-error')
+}
 function choose(item: string) { major.value = item; majorError.value = ''; open.value = false; activeIndex.value = -1 }
 function keydown(event: KeyboardEvent) {
   if (event.key === 'Escape') { open.value = false; activeIndex.value = -1; return }
@@ -67,7 +71,9 @@ function submit() {
 }
 function focusOut(event: FocusEvent) {
   const next = event.relatedTarget as Node | null
-  if (!next || !(event.currentTarget as HTMLElement).contains(next)) emit('focus-change', false)
+  if (!next || !(event.currentTarget as HTMLElement).contains(next)) {
+    open.value = false; activeIndex.value = -1; emit('focus-change', false)
+  }
 }
 function outside(event: MouseEvent) { if (root.value && !root.value.contains(event.target as Node)) open.value = false }
 onMounted(() => document.addEventListener('mousedown', outside))
@@ -79,13 +85,13 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
     <fieldset :disabled="loading">
       <div class="auth-field">
         <label for="register-username">用户名</label>
-        <input id="register-username" v-model="username" autocomplete="username" name="username" :disabled="loading" :aria-invalid="Boolean(usernameError || serverError)" :aria-describedby="describedBy(usernameError, 'register-username-error')" @input="usernameError = ''">
+        <input id="register-username" v-model="username" autocomplete="username" name="username" :disabled="loading" :aria-invalid="Boolean(usernameError)" :aria-describedby="describedBy(usernameError, 'register-username-error')" @input="edited(() => usernameError = '')">
         <p v-if="usernameError" id="register-username-error" class="field-error" role="alert">{{ usernameError }}</p>
       </div>
       <div class="auth-field">
         <label for="register-password">密码</label>
         <div class="password-control">
-          <input id="register-password" v-model="password" :type="passwordVisible ? 'text' : 'password'" autocomplete="new-password" name="password" :disabled="loading" :aria-invalid="Boolean(passwordError || serverError)" :aria-describedby="describedBy(passwordError, 'register-password-error')" @input="passwordError = ''">
+          <input id="register-password" v-model="password" :type="passwordVisible ? 'text' : 'password'" autocomplete="new-password" name="password" :disabled="loading" :aria-invalid="Boolean(passwordError)" :aria-describedby="describedBy(passwordError, 'register-password-error')" @input="edited(() => passwordError = '')">
           <ElTooltip :content="passwordVisible ? '隐藏密码' : '显示密码'" placement="top">
             <button type="button" class="password-toggle" data-test="password-toggle" :disabled="loading" :aria-label="passwordVisible ? '隐藏密码' : '显示密码'" @click="passwordVisible = !passwordVisible"><Hide v-if="passwordVisible" /><View v-else /></button>
           </ElTooltip>
@@ -94,7 +100,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
       </div>
       <div class="auth-field major-field">
         <label for="register-major">专业</label>
-        <input id="register-major" v-model="major" role="combobox" autocomplete="off" :disabled="loading" aria-autocomplete="list" :aria-expanded="open" aria-controls="register-major-listbox" :aria-activedescendant="activeId" :aria-invalid="Boolean(majorError || serverError)" :aria-describedby="describedBy(majorError, 'register-major-error')" @focus="open = true" @input="updateMajor" @keydown="keydown">
+        <input id="register-major" v-model="major" role="combobox" autocomplete="off" :disabled="loading" aria-autocomplete="list" :aria-expanded="open && filteredMajors.length > 0" aria-controls="register-major-listbox" :aria-activedescendant="activeId" :aria-invalid="Boolean(majorError)" :aria-describedby="describedBy(majorError, 'register-major-error')" @focus="open = filteredMajors.length > 0" @input="updateMajor" @keydown="keydown" @blur="open = false; activeIndex = -1">
         <ul v-show="open && filteredMajors.length" id="register-major-listbox" class="major-options" role="listbox">
           <li v-for="(item, index) in filteredMajors" :id="`register-major-option-${index}`" :key="item" role="option" :aria-selected="index === activeIndex" :class="{ active: index === activeIndex }" @mousedown.prevent="choose(item)">{{ item }}</li>
         </ul>
@@ -103,7 +109,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', outside))
       <fieldset class="learning-style" :disabled="loading">
         <legend>学习风格 <span>可选</span></legend>
         <div class="style-options">
-          <label v-for="item in styles" :key="item.value"><input v-model="learningStyle" type="radio" name="learning-style" :value="item.value" :disabled="loading"><span>{{ item.label }}</span></label>
+          <label v-for="item in styles" :key="item.value"><input v-model="learningStyle" type="radio" name="learning-style" :value="item.value" :disabled="loading" @change="emit('clear-error')"><span>{{ item.label }}</span></label>
         </div>
       </fieldset>
       <p v-if="serverError" id="register-server-error" class="server-error" role="alert">{{ serverError }}</p>
