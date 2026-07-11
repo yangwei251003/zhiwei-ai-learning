@@ -4,6 +4,11 @@ import { Moon, Sunny } from '@element-plus/icons-vue'
 import { ElTooltip } from 'element-plus'
 import BrandConstellation from './BrandConstellation.vue'
 
+withDefaults(defineProps<{ celebrating?: boolean; focused?: boolean }>(), {
+  celebrating: false,
+  focused: true,
+})
+
 const THEME_KEY = 'zhiwei.theme'
 const isDark = ref(false)
 
@@ -63,7 +68,7 @@ onMounted(() => {
           <li><strong>即时生成</strong><span>所学即得</span></li>
         </ul>
       </div>
-      <BrandConstellation :focused="true" />
+      <BrandConstellation :focused="focused" :celebrating="celebrating" />
     </aside>
   </main>
 </template>

@@ -51,6 +51,37 @@ img { display: block; max-width: 100%; }
 .brand-constellation.is-focused .focus-star { opacity: 1; box-shadow: 0 0 13px rgb(231 255 82 / 95%); }
 .brand-constellation.is-celebrating .constellation-mascot { animation: mascot-celebrate .65s cubic-bezier(.2,.8,.2,1) both; }
 
+.login-panel { position: relative; }
+.login-heading { margin-bottom: 30px; }
+.login-heading h2 { margin: 6px 0 10px; font-family: "Aptos Display", "IBM Plex Sans Variable", "Microsoft YaHei", sans-serif; font-size: clamp(30px, 4vw, 42px); font-weight: 650; line-height: 1.18; letter-spacing: 0; }
+.login-heading > p:last-child { margin: 0; color: var(--muted); font-size: 15px; line-height: 1.7; }
+.login-eyebrow { margin: 0; color: var(--brand-mid); font-size: 12px; font-weight: 700; letter-spacing: 0; }
+.login-form fieldset { display: grid; gap: 19px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.login-form fieldset:disabled { opacity: .7; }
+.auth-field { display: grid; gap: 8px; }
+.auth-field label { color: var(--ink); font-size: 14px; font-weight: 650; }
+.auth-field input:not([type="checkbox"]) { width: 100%; height: 50px; padding: 0 15px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--surface-raised); transition: border-color .2s ease, box-shadow .2s ease; }
+.auth-field input:hover { border-color: var(--brand-mid); }
+.auth-field input[aria-invalid="true"] { border-color: var(--danger); }
+.password-control { position: relative; }
+.password-control input { padding-right: 52px !important; }
+.password-toggle { position: absolute; top: 5px; right: 5px; display: grid; place-items: center; width: 40px; height: 40px; padding: 10px; border: 0; border-radius: 6px; color: var(--muted); background: transparent; cursor: pointer; }
+.password-toggle:hover { color: var(--brand-mid); background: color-mix(in srgb, var(--brand-mid) 8%, transparent); }
+.password-toggle svg { width: 19px; height: 19px; }
+.remember-control { display: inline-flex; width: fit-content; align-items: center; gap: 9px; color: var(--muted); font-size: 14px; cursor: pointer; }
+.remember-control input { width: 17px; height: 17px; margin: 0; accent-color: var(--brand-mid); }
+.field-error, .server-error { margin: 0; color: var(--danger); font-size: 13px; line-height: 1.45; }
+.server-error { padding: 11px 13px; border-left: 3px solid var(--danger); background: color-mix(in srgb, var(--danger) 7%, transparent); }
+.login-submit { width: 100%; height: 50px; padding: 0 20px; border: 1px solid var(--brand-deep); border-radius: 8px; color: var(--paper); background: var(--brand-deep); font-weight: 700; cursor: pointer; transition: background .2s ease, transform .2s ease; }
+.login-submit:hover:not(:disabled) { background: var(--brand-mid); transform: translateY(-1px); }
+.login-submit:disabled { cursor: wait; }
+.login-submit span { display: inline-block; min-width: 72px; }
+.auth-switch { margin: 22px 0 0; color: var(--muted); font-size: 14px; text-align: center; }
+.auth-switch a { color: var(--brand-mid); font-weight: 700; text-underline-offset: 3px; }
+.login-panel > .success-curtain { position: absolute; inset: -18px; z-index: 4; display: grid; place-content: center; gap: 7px; border-radius: 8px; color: var(--paper); background: var(--brand-deep); text-align: center; }
+.success-curtain strong { color: var(--action); font-size: 27px; }
+.success-curtain span { color: rgb(244 247 236 / 76%); font-size: 14px; }
+
 /* Compatibility for the existing workbench while its feature UI evolves. */
 .workbench { min-height: 100vh; background: var(--canvas); color: var(--ink); }
 .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 68px; padding: 0 28px; border-bottom: 1px solid var(--line); background: var(--surface); }
