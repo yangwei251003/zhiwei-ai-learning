@@ -9,16 +9,20 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
-      - key: VECTOR_DB_PATH
-        value: /var/data/chroma_db
-      - key: KNOWLEDGE_UPLOAD_DIR
-        value: /var/data/knowledge_uploads
+      - key: RAG_BACKEND
+        value: supabase
       - key: DATABASE_URL
         sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
         sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: knowledge-uploads
       - key: SPARK_APP_ID
         sync: false
       - key: SPARK_API_KEY
@@ -31,7 +35,3 @@ services:
         sync: false
       - key: AGNES_API_KEY
         sync: false
-    disk:
-      name: zhiwei-learning-data
-      mountPath: /var/data
-      sizeGB: 1
