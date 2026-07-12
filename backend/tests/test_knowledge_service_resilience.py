@@ -74,6 +74,28 @@ def test_service_atomic_write_and_idempotent_close(tmp_path):
     assert store.closed == 1
 
 
+def test_delete_removes_document_from_configured_object_storage(tmp_path, service_database):
+    from app.models import KnowledgeDocument
+    from app.services.knowledge_service import KnowledgeService
+
+    class Store:
+        def delete_document(self, *args): pass
+        def close(self): pass
+
+    class Storage:
+        def __init__(self): self.deleted = []
+        def delete(self, path): self.deleted.append(path)
+
+    storage = Storage()
+    service = KnowledgeService(Store(), tmp_path, object(), object_storage=storage)
+    with service_database() as db:
+        document = KnowledgeDocument(user_id=1, course="AI", original_filename="notes.txt", storage_name="owner/notes.txt", mime="text/plain", size=4)
+        db.add(document); db.commit(); db.refresh(document)
+        service.delete(db, 1, document.id)
+
+    assert storage.deleted == ["owner/notes.txt"]
+
+
 def test_llm_summary_prompt_is_bounded_and_schema_is_strict():
     from app.services.knowledge_service import LLMDocumentSummarizer
 

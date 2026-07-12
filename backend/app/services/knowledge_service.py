@@ -124,11 +124,12 @@ class LLMDocumentSummarizer:
 
 
 class KnowledgeService:
-    def __init__(self, store, upload_dir: str | Path, summarizer) -> None:
+    def __init__(self, store, upload_dir: str | Path, summarizer, object_storage=None) -> None:
         self.store = store
         self.upload_dir = Path(upload_dir)
         self.upload_dir.mkdir(parents=True, exist_ok=True)
         self.summarizer = summarizer
+        self.object_storage = object_storage
         self.document_locks = DocumentLockManager()
         self._close_lock = threading.Lock()
         self._closed = False
@@ -138,6 +139,8 @@ class KnowledgeService:
             if self._closed:
                 return
             self.store.close()
+            if self.object_storage is not None and hasattr(self.object_storage, "close"):
+                self.object_storage.close()
             self._closed = True
 
     def upload(self, db: Session, user_id: int, filename: str, mime: str, course: str, data: bytes):
@@ -162,6 +165,8 @@ class KnowledgeService:
             raise KnowledgeUnavailableError("could not create knowledge document") from exc
         try:
             self._atomic_write(path, data)
+            if self.object_storage is not None:
+                self.object_storage.upload(storage_name, data, normalized_mime)
             self._index(db, document, path)
         except DocumentParseError as exc:
             self._compensate_upload(db, document.id, user_id, path)
@@ -172,6 +177,9 @@ class KnowledgeService:
         except Exception as exc:
             self._compensate_upload(db, document.id, user_id, path)
             raise KnowledgeUnavailableError("knowledge indexing is unavailable") from exc
+        finally:
+            if self.object_storage is not None:
+                path.unlink(missing_ok=True)
         return document
 
     def _atomic_write(self, destination: Path, data: bytes) -> None:
@@ -193,6 +201,12 @@ class KnowledgeService:
         with self.document_locks.lock(document_id):
             document = self.get(db, user_id, document_id)
             path = self.upload_dir / document.storage_name
+            if self.object_storage is not None:
+                try:
+                    self._atomic_write(path, self.object_storage.download(document.storage_name))
+                except Exception as exc:
+                    self._fail_reindex(db, user_id, document_id)
+                    raise KnowledgeUnavailableError("stored document is unavailable") from exc
             if not path.is_file():
                 self._fail_reindex(db, user_id, document_id)
                 raise KnowledgeUnavailableError("stored document is unavailable")
@@ -204,6 +218,9 @@ class KnowledgeService:
             except Exception as exc:
                 self._fail_reindex(db, user_id, document_id)
                 raise KnowledgeUnavailableError("knowledge indexing is unavailable") from exc
+            finally:
+                if self.object_storage is not None:
+                    path.unlink(missing_ok=True)
             return document
 
     def _index(self, db: Session, document: KnowledgeDocument, path: Path) -> None:
@@ -230,6 +247,8 @@ class KnowledgeService:
         db.rollback()
         self._best_effort_vector_delete(user_id, document_id)
         try:
+            if self.object_storage is not None:
+                self.object_storage.delete(path.name)
             path.unlink(missing_ok=True)
         except Exception:
             logger.exception("Could not remove failed upload", extra={"document_id": document_id})
@@ -297,7 +316,10 @@ class KnowledgeService:
             path = self.upload_dir / document.storage_name
             try:
                 self.store.delete_document(user_id, document_id)
-                path.unlink(missing_ok=True)
+                if self.object_storage is not None:
+                    self.object_storage.delete(document.storage_name)
+                else:
+                    path.unlink(missing_ok=True)
                 db.delete(document)
                 db.commit()
             except Exception as exc:

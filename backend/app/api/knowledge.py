@@ -4,11 +4,13 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, Upl
 from sqlalchemy.orm import Session
 
 from app.core import get_settings
-from app.core.database import get_db
+from app.core.database import SessionLocal, get_db
 from app.core.security import get_current_user
 from app.knowledge_base.embeddings import LocalSentenceTransformerEmbedding
 from app.knowledge_base.loaders import MAX_FILE_BYTES
 from app.knowledge_base.store import ChromaRAGStore
+from app.knowledge_base.supabase_store import SupabaseRAGStore
+from app.knowledge_base.supabase_storage import SupabaseStorage
 from app.models import User
 from app.schemas import KnowledgeDocumentOut, KnowledgeSearchHit, KnowledgeSearchRequest
 from app.services.knowledge_service import (
@@ -23,6 +25,18 @@ router = APIRouter()
 def get_knowledge_service() -> KnowledgeService:
     settings = get_settings()
     embedding = LocalSentenceTransformerEmbedding(settings.embedding_model)
+    if settings.uses_supabase_rag:
+        storage = SupabaseStorage(
+            settings.supabase_url,
+            settings.supabase_service_role_key,
+            settings.supabase_storage_bucket,
+        )
+        return KnowledgeService(
+            SupabaseRAGStore(SessionLocal, embedding),
+            settings.knowledge_upload_dir,
+            LLMDocumentSummarizer(),
+            object_storage=storage,
+        )
     return KnowledgeService(
         ChromaRAGStore(settings.vector_db_path, embedding),
         settings.knowledge_upload_dir,
