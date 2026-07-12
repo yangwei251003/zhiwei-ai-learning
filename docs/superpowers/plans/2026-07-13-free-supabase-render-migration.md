@@ -85,7 +85,7 @@ def test_store_returns_tenant_scoped_lexical_hit_when_embedding_fails(session):
 
 ### Task 5: Move document lifecycle to Storage
 
-**Files:** Modify `backend/app/knowledge_base/service.py` and `backend/app/api/knowledge.py`; modify `backend/tests/test_knowledge_api.py`.
+**Files:** Modify `backend/app/services/knowledge_service.py` and `backend/app/api/knowledge.py`; modify `backend/tests/test_knowledge_api.py`.
 
 - [ ] Write the failing test asserting `DELETE /api/knowledge/{id}` deletes its private object path.
 - [ ] Run `python -m pytest tests/test_knowledge_api.py -q`; expect failure because deletion only handles local files.

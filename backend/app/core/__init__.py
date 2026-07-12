@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
     knowledge_upload_dir: str = "./knowledge_uploads"
     cors_origins: str = ""
+    rag_backend: str = "chroma"
+    supabase_url: str = ""
+    supabase_service_role_key: str = ""
+    supabase_storage_bucket: str = "knowledge-uploads"
 
     # JWT
     secret_key: str = ""
@@ -52,6 +56,12 @@ class Settings(BaseSettings):
     def require_secret_key(self) -> "Settings":
         if not self.secret_key.strip():
             raise ValueError("SECRET_KEY must be configured before startup")
+        if self.rag_backend not in {"chroma", "supabase"}:
+            raise ValueError("RAG_BACKEND must be chroma or supabase")
+        if self.rag_backend == "supabase" and (
+            not self.supabase_url.strip() or not self.supabase_service_role_key.strip()
+        ):
+            raise ValueError("Supabase RAG requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY")
         return self
 
     @property
@@ -61,6 +71,10 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def uses_supabase_rag(self) -> bool:
+        return self.rag_backend == "supabase"
 
 
 @lru_cache()
