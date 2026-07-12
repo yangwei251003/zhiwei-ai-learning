@@ -185,7 +185,7 @@ describe('user store', () => {
       username: 'new-user', password: 'secret', email: 'new@example.com', learning_style: 'hands_on',
     })
     expect(http.patch).toHaveBeenCalledWith('/api/profile/current', {
-      major: '软件工程', cognitive_style: '实践型',
+      major: '软件工程', cognitive_style: '实践型', reason: '完成注册初始化学习画像',
     })
     expect(result).toEqual({ profileSaved: false })
     expect(store.token).toBe('token-2')
@@ -199,9 +199,11 @@ describe('user store', () => {
     await store.saveProfile('计算机科学')
     await store.saveProfile('软件工程', 'visual')
 
-    expect(http.patch).toHaveBeenNthCalledWith(1, '/api/profile/current', { major: '计算机科学' })
+    expect(http.patch).toHaveBeenNthCalledWith(1, '/api/profile/current', {
+      major: '计算机科学', reason: '完成注册初始化学习画像',
+    })
     expect(http.patch).toHaveBeenNthCalledWith(2, '/api/profile/current', {
-      major: '软件工程', cognitive_style: 'visual',
+      major: '软件工程', cognitive_style: 'visual', reason: '完成注册初始化学习画像',
     })
   })
 

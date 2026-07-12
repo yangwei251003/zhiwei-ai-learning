@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/register", response_model=Token)
 def register(req: UserCreate, db: Session = Depends(get_db)):
     if db.query(User).filter(User.username == req.username).first():
-        raise HTTPException(status_code=400, detail="用户名已存在")
+        raise HTTPException(status_code=409, detail="用户名已存在")
     user = User(
         username=req.username,
         hashed_password=bcrypt.hash(req.password),
@@ -36,6 +36,13 @@ def login(req: UserLogin, db: Session = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 def get_me(user: User = Depends(get_current_user)):
     return user
+
+
+@router.get("/users", response_model=list[UserOut])
+def list_users(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="仅管理员可查看用户列表")
+    return db.query(User).order_by(User.id.desc()).all()
 
 
 @router.patch("/me", response_model=UserOut)

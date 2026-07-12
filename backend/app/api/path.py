@@ -36,6 +36,14 @@ def current_path(user: User = Depends(get_current_user), service: PathService = 
     except PathNotFound as exc: _not_found(exc)
 
 
+@router.get("/status")
+def path_status(user: User = Depends(get_current_user), service: PathService = Depends(get_path_service)):
+    try:
+        return {"path": service.current(user.id)}
+    except PathNotFound:
+        return {"path": None}
+
+
 @router.patch("/{path_id}/progress", response_model=PathOut)
 def update_progress(path_id: int, request: PathProgressRequest, user: User = Depends(get_current_user), service: PathService = Depends(get_path_service)):
     try: return service.update_progress(user.id, path_id, request.step, request.status)

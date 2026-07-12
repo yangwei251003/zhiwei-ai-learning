@@ -94,3 +94,43 @@ def test_patch_me_rejects_empty_and_duplicate(auth_client):
     headers = {"Authorization": f"Bearer {token}"}
     assert client.patch("/api/auth/me", json={}, headers=headers).status_code == 422
     assert client.patch("/api/auth/me", json={"username": "taken_name"}, headers=headers).status_code == 400
+
+
+def test_register_duplicate_username_returns_conflict(auth_client):
+    client, _ = auth_client
+    payload = {"username": "duplicate_name", "password": "password123"}
+    assert client.post("/api/auth/register", json=payload).status_code == 200
+    response = client.post("/api/auth/register", json=payload)
+    assert response.status_code == 409
+    assert response.json()["detail"] == "用户名已存在"
+
+
+def test_admin_can_list_users_but_student_cannot(auth_client):
+    client, _ = auth_client
+    student_token = client.post(
+        "/api/auth/register", json={"username": "student_user", "password": "password123"}
+    ).json()["access_token"]
+    admin_token = client.post(
+        "/api/auth/register", json={"username": "admin_user", "password": "password123"}
+    ).json()["access_token"]
+
+    from app.core.database import get_db
+    from app.main import app
+    from app.models import User
+
+    db = next(app.dependency_overrides[get_db]())
+    try:
+        admin = db.query(User).filter(User.username == "admin_user").one()
+        admin.role = "admin"
+        db.commit()
+    finally:
+        db.close()
+
+    assert client.get(
+        "/api/auth/users", headers={"Authorization": f"Bearer {student_token}"}
+    ).status_code == 403
+    response = client.get(
+        "/api/auth/users", headers={"Authorization": f"Bearer {admin_token}"}
+    )
+    assert response.status_code == 200
+    assert {item["username"] for item in response.json()} >= {"student_user", "admin_user"}

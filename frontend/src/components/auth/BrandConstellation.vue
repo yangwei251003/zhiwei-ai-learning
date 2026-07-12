@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<{
 
 const mascotSource = computed(() => props.celebrating
   ? '/assets/mascot-celebrate.png'
-  : '/assets/mascot-hero.png')
+  : '/assets/mascot-hero.webp')
 </script>
 
 <template>

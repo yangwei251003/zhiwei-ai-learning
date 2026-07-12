@@ -6,6 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models import LearningPath, LearningResource
+from app.llm.json_output import extract_json_value
 from app.schemas.path import PathPlan
 
 
@@ -54,7 +55,7 @@ class PathService:
         )
         try:
             raw = await self.llm.complete(prompt)
-            plan = PathPlan.model_validate_json(raw)
+            plan = PathPlan.model_validate(extract_json_value(raw))
         except (ValidationError, ValueError, TypeError, json.JSONDecodeError) as exc:
             raise PathValidationError("LLM returned an invalid learning path") from exc
         if [step.step for step in plan.steps] != list(range(1, len(plan.steps) + 1)):

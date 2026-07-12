@@ -1,49 +1,42 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { RefreshRight, SwitchButton } from '@element-plus/icons-vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useHealthStore } from '../stores/health'
-import { useUserStore } from '../stores/user'
+import AppShell from '../components/product/AppShell.vue'
+import http from '../utils/http'
+import type { Profile } from '../types/product'
 
-const health = useHealthStore()
-const userStore = useUserStore()
 const router = useRouter()
-const healthDetail = computed(() => health.payload ? JSON.stringify(health.payload, null, 2) : health.error || '等待连接')
-
-async function logout() {
-  userStore.logout()
-  await router.replace('/login')
-}
+const profile = ref<Profile | null>(null)
+const resources = ref(0)
+const pathProgress = ref(0)
+const filmActive = ref(false)
+onMounted(async () => {
+  const [p, r] = await Promise.allSettled([http.get<Profile>('/api/profile/current'), http.get('/api/resources/?limit=1')])
+  if (p.status === 'fulfilled') profile.value = p.value.data
+  if (r.status === 'fulfilled') resources.value = Number(r.value.data.total || 0)
+  try {
+    const current = await http.get('/api/path/status')
+    const steps = current.data.path?.path_data || []
+    pathProgress.value = steps.length ? Math.round(steps.filter((item: { status: string }) => item.status === 'completed').length / steps.length * 100) : 0
+  } catch { pathProgress.value = 0 }
+  window.setTimeout(() => { filmActive.value = true }, 2400)
+})
 </script>
 
 <template>
-  <main class="workbench">
-    <header class="topbar">
-      <div class="brand"><img class="brand-mark" src="/assets/mascot-logo.png" alt="小智析析" /><span>知微智学</span></div>
-      <div class="topbar-actions">
-        <div class="topbar-status"><span class="status-dot"></span>学习工作台</div>
-        <div class="user-menu"><span class="username">{{ userStore.user?.username }}</span><el-button circle text aria-label="退出登录" title="退出登录" @click="logout"><el-icon><SwitchButton /></el-icon></el-button></div>
-      </div>
-    </header>
-    <section class="workspace" aria-label="学习工作台">
-      <aside class="left-rail animate-fade-up">
-        <p class="section-label">学习流程</p>
-        <nav class="task-list" aria-label="学习任务"><button class="task active"><span>01</span>诊断与画像</button><button class="task"><span>02</span>知识星图</button><button class="task"><span>03</span>学习路径</button></nav>
-        <div class="timeline"><p class="section-label">当前会话</p><div class="timeline-item"><span></span><p>准备建立学习画像</p></div><div class="timeline-item muted"><span></span><p>等待第一条学习输入</p></div></div>
-      </aside>
-      <section class="center-stage">
-        <div class="hero-panel animate-fade-up"><div class="hero-copy"><p class="section-label">小智析析正在待命</p><h1>把每一次学习，变成看得见的<span>星光</span></h1><p>从真实输入开始，建立可演化的学习画像与下一步路径。</p></div><img class="hero-mascot animate-float" src="/assets/mascot-hero.png" alt="漂浮的小智析析" /></div>
-        <div class="health-panel animate-scale"><div class="health-heading"><div><span class="health-label">后端服务</span><strong :class="['health-state', health.status]">{{ health.label }}</strong></div><el-button type="primary" :loading="health.loading" @click="health.check"><el-icon><RefreshRight /></el-icon>检查连接</el-button></div><pre class="health-result">{{ healthDetail }}</pre></div>
-      </section>
-      <aside class="right-rail animate-fade-up">
-        <p class="section-label">学习画像</p><div class="profile-summary"><img src="/assets/mascot-chat.png" alt="微笑的小智析析" /><div><strong>等待初始化</strong><p>完成诊断后生成画像</p></div></div>
-        <p class="section-label agent-heading">Agent 协作</p><ul class="agent-list"><li><img src="/assets/icon-graph.svg" alt="" /><span>画像构建 Agent</span><em>待命</em></li><li><img src="/assets/icon-path.svg" alt="" /><span>路径规划 Agent</span><em>待命</em></li><li><img src="/assets/icon-document.svg" alt="" /><span>资源生成 Agent</span><em>待命</em></li></ul>
-        <div class="challenge"><strong>每日挑战</strong><p>完成第一条学习输入，点亮你的学习星图。</p><div class="progress-track" aria-label="挑战进度 68%"><span></span></div></div>
-      </aside>
+  <AppShell>
+    <section class="home-hero playground-hero">
+      <video class="hero-film" :src="filmActive ? '/assets/editorial/code-review.mp4' : undefined" autoplay muted loop playsinline preload="none" poster="/assets/editorial/code-review-poster.jpg" aria-hidden="true" />
+      <div class="hero-film-shade" />
+      <div class="hero-copy"><span class="eyebrow">你的个性化学习星图</span><h1>把好奇心，玩成<br /><em>真正的能力。</em></h1><p>为大学生打造的 AI 学习游乐场：一句话生成讲解、资源和专属路径，边探索，边看见成长。</p><button class="primary-button glow" @click="router.push('/chat')">开始今天的探索 <span>→</span></button></div>
+      <div class="hero-sticker"><img src="/assets/mascot-hero.webp" alt="小智析析邀请你开始学习" /><span>5 个 Agent<br />正在组队</span></div>
     </section>
-  </main>
+    <section class="metric-strip">
+      <article><span>画像专业</span><strong>{{ profile?.major || '待探索' }}</strong><small>随对话持续更新</small></article>
+      <article><span>已生成资源</span><strong>{{ resources }}</strong><small>文档、导图与练习</small></article>
+      <article><span>路径进度</span><strong>{{ pathProgress }}%</strong><small>每一步都算数</small></article>
+    </section>
+    <section class="section-block"><div class="section-heading"><div><span class="eyebrow">三步形成学习闭环</span><h2>从一句问题，到一条自己的路</h2></div></div><div class="feature-grid"><article><b>01</b><img src="/assets/icon-graph.svg" alt="" loading="lazy" /><h3>先理解你</h3><p>从专业、目标和偏好建立可演化画像。</p></article><article><b>02</b><img src="/assets/icon-document.svg" alt="" loading="lazy" /><h3>再创造资源</h3><p>一次生成讲解、导图、测验与代码案例。</p></article><article><b>03</b><img src="/assets/icon-path.svg" alt="" loading="lazy" /><h3>持续走下去</h3><p>把目标拆成有进度、有反馈的学习路径。</p></article></div></section>
+    <section class="editorial-band"><img src="/assets/editorial/electronics-class.jpg" alt="学生在课堂中动手学习电子技术" loading="lazy" /><div><span class="eyebrow">专业不是边界，是起点</span><h2>把课堂知识接到真实世界</h2><p>无论电气、计算机还是交叉学科，画像 Agent 都会用你的专业语境组织例子，让抽象知识变得可感、可练、可迁移。</p><button class="secondary-button" @click="router.push('/tutor')">问问智能辅导 →</button></div></section>
+  </AppShell>
 </template>
-
-<style scoped>
-.topbar-actions,.user-menu{display:flex;align-items:center;gap:12px}.user-menu{min-width:0;padding-left:12px;border-left:1px solid var(--color-border)}.username{max-width:12rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.workspace>*{min-width:0}@media(max-width:720px){.topbar-status{display:none}.username{max-width:8rem}.workspace{overflow-x:hidden}}
-</style>

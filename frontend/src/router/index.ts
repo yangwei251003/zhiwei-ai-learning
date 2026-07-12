@@ -33,9 +33,38 @@ export function createAppRouter(): Router {
         path: '/workbench',
         name: 'workbench',
         component: routeComponent(() => import('../views/WorkbenchView.vue')),
-        meta: { requiresAuth: true },
+        meta: { requiresAuth: true, title: '首页' },
       },
-      { path: '/', name: 'home', component: { template: '<div />' } },
+      {
+        path: '/', name: 'home',
+        component: routeComponent(() => import('../views/HomeView.vue')),
+        meta: { requiresAuth: true, title: '首页' },
+      },
+      {
+        path: '/chat', name: 'chat',
+        component: routeComponent(() => import('../views/ChatView.vue')),
+        meta: { requiresAuth: true, title: '多智能体对话' },
+      },
+      {
+        path: '/resources', name: 'resources',
+        component: routeComponent(() => import('../views/ResourcesView.vue')),
+        meta: { requiresAuth: true, title: '学习资源库' },
+      },
+      {
+        path: '/path', name: 'path',
+        component: routeComponent(() => import('../views/PathView.vue')),
+        meta: { requiresAuth: true, title: '学习路径' },
+      },
+      {
+        path: '/tutor', name: 'tutor',
+        component: routeComponent(() => import('../views/TutorView.vue')),
+        meta: { requiresAuth: true, title: '智能辅导' },
+      },
+      {
+        path: '/admin', name: 'admin',
+        component: routeComponent(() => import('../views/AdminView.vue')),
+        meta: { requiresAuth: true, title: '管理后台' },
+      },
     ],
   })
 }

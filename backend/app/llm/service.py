@@ -9,6 +9,7 @@ from app.llm.spark import (
     SparkEmptyResponseError,
     SparkLLM,
 )
+from app.llm.providers import build_provider_router
 
 
 Sleep = Callable[[float], Awaitable[None]]
@@ -27,7 +28,12 @@ _TRANSIENT_NETWORK_ERRNOS = frozenset(
 
 class LLMService:
     def __init__(self, client: Any | None = None, sleep: Sleep = asyncio.sleep) -> None:
-        self._client = SparkLLM() if client is None else client
+        if client is None:
+            from app.core import get_settings
+            settings = get_settings()
+            self._client = build_provider_router(settings, SparkLLM())
+        else:
+            self._client = client
         self._sleep = sleep
 
     async def stream(

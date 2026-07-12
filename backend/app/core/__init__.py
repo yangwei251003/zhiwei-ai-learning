@@ -26,6 +26,18 @@ class Settings(BaseSettings):
 
     # 可选补充模型
     deepseek_api_key: str = ""
+    zhipu_api_key: str = ""
+    zhipu_base_url: str = "https://open.bigmodel.cn/api/paas/v4"
+    zhipu_model: str = "glm-4.7-flash"
+    ant_bailing_api_key: str = ""
+    ant_bailing_base_url: str = "https://api.ant-ling.com/v1"
+    ant_bailing_model: str = "Ling-2.6-flash"
+    agnes_api_key: str = ""
+    agnes_base_url: str = "https://apihub.agnes-ai.com/v1"
+    agnes_model: str = "agnes-2.0-flash"
+    ollama_enabled: bool = False
+    ollama_base_url: str = "http://127.0.0.1:11434/v1"
+    ollama_model: str = "qwen2.5:3b"
 
     log_level: str = "INFO"
 

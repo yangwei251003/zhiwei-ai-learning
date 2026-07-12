@@ -7,7 +7,15 @@ import WorkbenchView from './WorkbenchView.vue'
 import { useUserStore } from '../stores/user'
 
 const replace = vi.fn()
-vi.mock('vue-router', () => ({ useRouter: () => ({ replace }) }))
+const push = vi.fn()
+vi.mock('vue-router', () => ({
+  RouterLink: { template: '<a><slot /></a>' },
+  useRoute: () => ({ path: '/workbench', meta: { title: '首页' } }),
+  useRouter: () => ({ push, replace }),
+}))
+vi.mock('../utils/http', () => ({
+  default: { get: vi.fn().mockRejectedValue(new Error('offline')) },
+}))
 
 describe('WorkbenchView', () => {
   beforeEach(() => {
@@ -15,14 +23,13 @@ describe('WorkbenchView', () => {
     setActivePinia(createPinia())
   })
 
-  it('shows the learning workspace and signed-in username', () => {
+  it('shows the product home and signed-in username', () => {
     useUserStore().user = { id: 1, username: 'student', email: 'student@example.com', learning_style: 'visual' }
     const wrapper = mount(WorkbenchView, { global: { stubs: { ElButton: { template: '<button><slot /></button>' }, ElIcon: true } } })
 
-    expect(wrapper.text()).toContain('学习流程')
-    expect(wrapper.text()).toContain('后端服务')
-    expect(wrapper.text()).toContain('Agent 协作')
-    expect(wrapper.text()).toContain('每日挑战')
+    expect(wrapper.text()).toContain('把好奇心，玩成')
+    expect(wrapper.text()).toContain('开始今天的探索')
+    expect(wrapper.text()).toContain('从一句问题，到一条自己的路')
     expect(wrapper.text()).toContain('student')
   })
 

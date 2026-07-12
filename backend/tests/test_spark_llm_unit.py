@@ -244,7 +244,9 @@ async def test_sdk_process_is_terminated_and_joined_on_cancellation():
         process_target=blocking_sdk_process,
     )
     stream = llm.stream("hello")
-    assert await asyncio.wait_for(anext(stream), timeout=3) == "first"
+    # Windows spawn may spend several seconds importing the test module on
+    # cold/guarded machines; this assertion tests cleanup, not startup speed.
+    assert await asyncio.wait_for(anext(stream), timeout=15) == "first"
 
     pending = asyncio.create_task(anext(stream))
     await asyncio.sleep(0.05)

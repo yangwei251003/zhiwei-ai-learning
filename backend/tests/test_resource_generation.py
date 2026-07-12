@@ -83,6 +83,34 @@ async def test_generate_all_rolls_back_whole_batch_on_one_invalid_result(db):
 
 
 @pytest.mark.asyncio
+async def test_generate_all_accepts_json_wrapped_in_markdown_fences(db):
+    class Rag:
+        def search(self, *args, **kwargs): return []
+    class Llm:
+        async def chat(self, prompt, **kwargs):
+            kind = prompt.split("RESOURCE_TYPE:")[1].split()[0]
+            return f"```json\n{json.dumps(payload(kind))}\n```"
+    cards = await ResourceGenerationService(Llm(), Rag(), db).generate_all(db.get(User, 1), "loops", "python", {})
+    assert len(cards) == 5
+
+
+@pytest.mark.asyncio
+async def test_generate_all_normalizes_plain_text_mindmap_to_mermaid(db):
+    class Rag:
+        def search(self, *args, **kwargs): return []
+    class Llm:
+        async def chat(self, prompt, **kwargs):
+            kind = prompt.split("RESOURCE_TYPE:")[1].split()[0]
+            body = payload(kind)
+            if kind == "mindmap":
+                body["mindmap"] = "Python 变量与数据类型\n变量命名\n整数与字符串"
+            return json.dumps(body, ensure_ascii=False)
+    cards = await ResourceGenerationService(Llm(), Rag(), db).generate_all(db.get(User, 1), "loops", "python", {})
+    mindmap = next(card for card in cards if card["payload"]["resource_type"] == "mindmap")
+    assert mindmap["payload"]["mindmap"].startswith("mindmap\n")
+
+
+@pytest.mark.asyncio
 async def test_achievement_failure_rolls_back_the_resource_batch(db):
     class Rag:
         def search(self, *args, **kwargs): return []

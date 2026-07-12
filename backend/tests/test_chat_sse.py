@@ -9,6 +9,7 @@ from app.api import chat
 from app.api.knowledge import get_knowledge_service
 from app.core.database import Base, get_db
 from app.main import app
+from app.schemas import ChatRequest
 
 
 @pytest.fixture
@@ -93,3 +94,8 @@ def test_stream_requires_jwt_and_rejects_foreign_conversation(sse_client):
         assert response.status_code == 403
     finally:
         db.close()
+
+
+def test_chat_request_accepts_five_thousand_characters():
+    request = ChatRequest(message="学" * 5000, course="Python")
+    assert len(request.message) == 5000

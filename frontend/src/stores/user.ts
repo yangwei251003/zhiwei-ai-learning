@@ -96,6 +96,7 @@ export const useUserStore = defineStore('user', () => {
     await http.patch('/api/profile/current', {
       major,
       ...(learningStyle === undefined ? {} : { cognitive_style: learningStyle }),
+      reason: '完成注册初始化学习画像',
     })
   }
 

@@ -36,7 +36,7 @@ onMounted(() => {
     <section class="auth-content" aria-label="账户访问">
       <header class="auth-header">
         <a class="auth-brand" href="/" aria-label="知微智学首页">
-          <img src="/assets/mascot-logo.png" alt="知微智学小智析析标识">
+          <img src="/assets/mascot-logo.webp" alt="知微智学小智析析标识">
           <strong>知微智学</strong>
         </a>
         <ElTooltip :content="themeLabel" placement="bottom">

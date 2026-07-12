@@ -32,6 +32,17 @@ describe('authentication route guard', () => {
     return { router, store: useUserStore(pinia) }
   }
 
+  it('registers every protected product surface', () => {
+    const router = createAppRouter()
+    const paths = new Set(router.getRoutes().map((route) => route.path))
+    for (const path of ['/', '/chat', '/resources', '/path', '/tutor', '/admin']) {
+      expect(paths.has(path)).toBe(true)
+    }
+    for (const path of ['/chat', '/resources', '/path', '/tutor', '/admin']) {
+      expect(router.getRoutes().find((route) => route.path === path)?.meta.requiresAuth).toBe(true)
+    }
+  })
+
   it('binds the HTTP authentication client when the guard is installed', () => {
     const { store } = setup()
     store.token = 'router-bound-token'

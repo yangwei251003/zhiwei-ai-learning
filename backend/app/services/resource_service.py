@@ -5,6 +5,7 @@ import json
 from pydantic import ValidationError
 
 from app.models import LearningResource, ResourceLink
+from app.llm.json_output import extract_json_value
 from app.schemas.resources import CodeCaseResult, DocumentResult, MindmapResult, QuizResult, VideoScriptResult
 
 
@@ -37,14 +38,35 @@ class ResourceGenerationService:
             guidance.append("Include more runnable code and hands-on examples.")
         return " ".join(guidance) or "Adapt depth to the learner profile."
 
+    @staticmethod
+    def _normalize_payload(kind, data, topic):
+        if kind != "mindmap" or not isinstance(data, dict):
+            return data
+        value = data.get("mindmap")
+        if not isinstance(value, str) or value.lstrip().startswith("mindmap"):
+            return data
+        lines = [line.strip().lstrip("-#*• ").strip() for line in value.splitlines()]
+        lines = [line for line in lines if line]
+        root = (lines[0] if lines else topic).replace("(", "（").replace(")", "）")[:80]
+        children = [line.replace("(", "（").replace(")", "）")[:120] for line in lines[1:9]]
+        if not children:
+            children = ["核心概念"]
+        normalized = dict(data)
+        normalized["mindmap"] = "mindmap\n  root((%s))\n%s" % (
+            root,
+            "\n".join(f"    {line}" for line in children),
+        )
+        return normalized
+
     async def _generate_one(self, kind, user_id, topic, course, profile):
         hits = await self._call(self.rag.search, f"{topic} {kind}", user_id, course, top_k=5)
-        prompt = f"RESOURCE_TYPE:{kind} Return JSON only. Topic: {topic}. Course: {course}. {self._profile_guidance(profile)} RAG: {json.dumps(hits, ensure_ascii=False)}"
+        schema = json.dumps(self.MODELS[kind].model_json_schema(), ensure_ascii=False)
+        prompt = f"RESOURCE_TYPE:{kind} Return one JSON object only, without commentary. The object must satisfy this JSON Schema: {schema}. Topic: {topic}. Course: {course}. {self._profile_guidance(profile)} RAG: {json.dumps(hits, ensure_ascii=False)}"
         if hasattr(self.llm, "chat"):
             raw = await self._call(self.llm.chat, prompt, max_tokens=4096)
         else:
             raw = await self._call(self.llm.complete, prompt)
-        data = raw if isinstance(raw, dict) else json.loads(raw)
+        data = self._normalize_payload(kind, extract_json_value(raw), topic)
         return kind, self.MODELS[kind].model_validate(data)
 
     async def generate_all(self, user, topic, course, profile):

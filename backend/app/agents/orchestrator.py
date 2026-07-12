@@ -10,6 +10,8 @@ from app.llm.service import LLMService
 class _LLMServiceWithStatus(LLMService):
     def is_connected(self):
         client = self._client
+        if hasattr(client, "configured"):
+            return bool(client.configured)
         return all(bool(getattr(client, name, "").strip()) for name in ("app_id", "api_key", "api_secret"))
 
 

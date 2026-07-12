@@ -48,7 +48,7 @@ class UserUpdate(BaseModel):
 
 # ---------- 对话 ----------
 class ChatRequest(BaseModel):
-    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)]
     course: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)] = "人工智能导论"
     conversation_id: int | None = Field(default=None, gt=0)
 
