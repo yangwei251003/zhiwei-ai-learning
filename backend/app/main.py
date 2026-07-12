@@ -6,6 +6,7 @@ from app.core import get_settings
 from app.api import achievements, agents, auth, challenges, chat, graph, knowledge, path, profile, resources
 
 settings = get_settings()
+default_cors_origins = ["http://localhost:5173", "http://localhost:3000"]
 
 
 @asynccontextmanager
@@ -25,7 +26,7 @@ app = FastAPI(
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=settings.cors_origins_list or default_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

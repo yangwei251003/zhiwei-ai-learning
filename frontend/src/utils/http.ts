@@ -30,7 +30,8 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler): void {
   unauthorizedHandler = handler
 }
 
-const http = axios.create({ timeout: 8000 })
+const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
+const http = axios.create({ baseURL: configuredApiBaseUrl || undefined, timeout: 8000 })
 
 http.interceptors.request.use((config) => {
   const token = authTokenProvider()

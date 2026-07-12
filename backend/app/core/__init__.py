@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     vector_db_path: str = "./chroma_db"
     embedding_model: str = "paraphrase-multilingual-MiniLM-L12-v2"
     knowledge_upload_dir: str = "./knowledge_uploads"
+    cors_origins: str = ""
 
     # JWT
     secret_key: str = ""
@@ -56,6 +57,10 @@ class Settings(BaseSettings):
     @property
     def base_dir(self) -> Path:
         return Path(__file__).parent.parent.parent
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache()
