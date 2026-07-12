@@ -17,6 +17,8 @@ from sqlalchemy import (
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import relationship
 from sqlalchemy.types import TypeDecorator
+from sqlalchemy.dialects.postgresql import TSVECTOR
+from pgvector.sqlalchemy import Vector
 from datetime import datetime, timezone
 import json
 
@@ -239,6 +241,32 @@ class KnowledgeDocument(Base):
     )
 
     user = relationship("User", back_populates="knowledge_documents")
+
+
+class KnowledgeChunk(Base):
+    """Durable, tenant-scoped retrieval chunks for the Supabase backend."""
+
+    __tablename__ = "knowledge_chunks"
+    __table_args__ = (
+        UniqueConstraint("document_id", "chunk_index", name="uq_knowledge_chunk_document_index"),
+        Index("ix_knowledge_chunk_tenant_course", "user_id", "course"),
+    )
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    document_id = Column(Integer, ForeignKey("knowledge_documents.id"), nullable=False)
+    course = Column(String(100), nullable=False)
+    filename = Column(String(255), nullable=False)
+    source_type = Column(String(50), nullable=False)
+    chunk_index = Column(Integer, nullable=False)
+    content = Column(Text, nullable=False)
+    page = Column(Integer)
+    paragraph = Column(Integer)
+    char_start = Column(Integer, nullable=False)
+    char_end = Column(Integer, nullable=False)
+    embedding = Column(Vector(384).with_variant(Text(), "sqlite"), nullable=True)
+    search_vector = Column(TSVECTOR().with_variant(Text(), "sqlite"), nullable=True)
+    created_at = Column(DateTime(timezone=True), nullable=False, default=utc_now)
 class ResourceLink(Base):
     __tablename__ = "resource_links"
     __table_args__ = (
