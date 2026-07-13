@@ -19,9 +19,8 @@ spark-ai-python==0.3.0
 langgraph==0.2.60
 langchain==0.3.14
 langchain-community==0.3.14
-# 向量数据库
-chromadb==1.5.9
-sentence-transformers==3.3.1
+# 本地 Chroma / SentenceTransformer 开发依赖见 requirements.local.txt。
+# 正式环境使用 Supabase pgvector，避免在 Vercel Serverless 中安装大型本地模型。
 # 工具
 python-multipart==0.0.20
 jinja2==3.1.4

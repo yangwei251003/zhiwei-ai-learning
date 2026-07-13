@@ -8,7 +8,6 @@ from app.core.database import SessionLocal, get_db
 from app.core.security import get_current_user
 from app.knowledge_base.embeddings import LocalSentenceTransformerEmbedding
 from app.knowledge_base.loaders import MAX_FILE_BYTES
-from app.knowledge_base.store import ChromaRAGStore
 from app.knowledge_base.supabase_store import SupabaseRAGStore
 from app.knowledge_base.supabase_storage import SupabaseStorage
 from app.models import User
@@ -37,6 +36,7 @@ def get_knowledge_service() -> KnowledgeService:
             LLMDocumentSummarizer(),
             object_storage=storage,
         )
+    from app.knowledge_base.store import ChromaRAGStore
     return KnowledgeService(
         ChromaRAGStore(settings.vector_db_path, embedding),
         settings.knowledge_upload_dir,
