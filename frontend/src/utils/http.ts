@@ -33,6 +33,11 @@ export function setUnauthorizedHandler(handler: UnauthorizedHandler): void {
 const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '')
 const http = axios.create({ baseURL: configuredApiBaseUrl || undefined, timeout: 8000 })
 
+export function resolveApiUrl(path: string): string {
+  if (!configuredApiBaseUrl) return path
+  return `${configuredApiBaseUrl}${path.startsWith('/') ? path : `/${path}`}`
+}
+
 http.interceptors.request.use((config) => {
   const token = authTokenProvider()
   if (token) {
