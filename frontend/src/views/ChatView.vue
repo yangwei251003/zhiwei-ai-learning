@@ -7,7 +7,7 @@ import ResourceCard from '../components/product/ResourceCard.vue'
 import { useUserStore } from '../stores/user'
 import type { LearningResource, Profile } from '../types/product'
 import { parseSseBlock } from '../utils/sse'
-import http from '../utils/http'
+import http, { resolveApiUrl } from '../utils/http'
 
 interface Message { role: 'user' | 'assistant'; content: string; resources?: LearningResource[]; error?: boolean }
 const user = useUserStore(); const router = useRouter(); const input = ref(''); const messages = ref<Message[]>([])
@@ -46,7 +46,7 @@ async function streamMessage(text: string, assistant: Message) {
     const original = assistant.content; const originalResources = assistant.resources ? [...assistant.resources] : undefined
     try {
       reconnecting.value = attempt > 0
-      const response = await fetch('/api/chat/stream', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` }, body: JSON.stringify({ message: text, course: profile.value?.major || 'Python', conversation_id: conversationId.value }) })
+      const response = await fetch(resolveApiUrl('/api/chat/stream'), { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${user.token}` }, body: JSON.stringify({ message: text, course: profile.value?.major || 'Python', conversation_id: conversationId.value }) })
       if (response.status === 401) { user.logout(); await router.replace('/login'); return }
       if (!response.ok) { const body = await response.json().catch(() => ({})); throw new Error(body.detail || `服务请求失败（${response.status}）`) }
       await consume(response, assistant); reconnecting.value = false; return
