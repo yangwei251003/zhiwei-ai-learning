@@ -9,10 +9,12 @@ def test_render_manifest_does_not_require_a_persistent_disk():
     assert "SUPABASE_SERVICE_ROLE_KEY" in manifest
 
 
-def test_vercel_uses_native_python_file_routing_without_legacy_rewrites():
+def test_vercel_rewrites_backend_requests_to_the_fastapi_entrypoint():
     root = Path(__file__).parents[1]
+    manifest = (root / "vercel.json").read_text(encoding="utf-8")
 
-    assert not (root / "vercel.json").exists()
+    assert '"/(.*)"' in manifest
+    assert '"/api/index.py"' in manifest
 
 
 def test_vercel_keeps_a_direct_runtime_probe_module():
