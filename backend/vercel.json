@@ -1,6 +1,7 @@
 {
   "version": 2,
   "rewrites": [
+    { "source": "/__runtime_probe", "destination": "/api/probe.py" },
     { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
