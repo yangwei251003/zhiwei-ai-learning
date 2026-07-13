@@ -1,4 +1,6 @@
 from types import SimpleNamespace
+import tempfile
+from pathlib import Path
 
 
 def test_knowledge_service_uses_supabase_adapters_when_configured(monkeypatch):
@@ -22,5 +24,6 @@ def test_knowledge_service_uses_supabase_adapters_when_configured(monkeypatch):
 
     assert isinstance(service.store, SupabaseRAGStore)
     assert isinstance(service.object_storage, SupabaseStorage)
+    assert service.upload_dir.parent == Path(tempfile.gettempdir())
     service.close()
     knowledge.get_knowledge_service.cache_clear()
