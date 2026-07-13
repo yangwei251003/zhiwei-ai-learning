@@ -18,13 +18,21 @@ class SupabaseRAGStore:
     def close(self) -> None:
         return None
 
+    def _uses_pgvector(self) -> bool:
+        bind = self.session_factory.kw.get("bind")
+        return bind is not None and bind.dialect.name == "postgresql"
+
     def index_document(self, user_id: int, document_id: int, course: str, filename: str, chunks: list[TextChunk]) -> int:
         if not chunks:
             raise ValueError("chunks must not be empty")
-        try:
-            vectors = validate_embeddings([chunk.text for chunk in chunks], self.embedding.encode([chunk.text for chunk in chunks]))
-        except Exception:
-            vectors = [None] * len(chunks)
+        vectors = [None] * len(chunks)
+        if self._uses_pgvector():
+            try:
+                vectors = validate_embeddings(
+                    [chunk.text for chunk in chunks], self.embedding.encode([chunk.text for chunk in chunks])
+                )
+            except Exception:
+                pass
         session = self.session_factory()
         try:
             session.query(KnowledgeChunk).filter(
@@ -77,6 +85,19 @@ class SupabaseRAGStore:
         terms = [term.casefold() for term in query.split() if term.strip()]
         session = self.session_factory()
         try:
+            if self._uses_pgvector():
+                try:
+                    query_vector = validate_embeddings([query], self.embedding.encode([query]))[0]
+                    distance = KnowledgeChunk.embedding.cosine_distance(query_vector)
+                    rows = session.query(KnowledgeChunk, distance.label("distance")).filter(
+                        KnowledgeChunk.user_id == user_id,
+                        KnowledgeChunk.course == course,
+                        KnowledgeChunk.embedding.is_not(None),
+                    ).order_by(distance, KnowledgeChunk.chunk_index).limit(top_k).all()
+                    if rows:
+                        return [self._serialize_hit(row, max(0.0, 1.0 - float(distance)), query) for row, distance in rows]
+                except Exception:
+                    session.rollback()
             rows = session.query(KnowledgeChunk).filter(
                 KnowledgeChunk.user_id == user_id,
                 KnowledgeChunk.course == course,
@@ -89,13 +110,14 @@ class SupabaseRAGStore:
             if matched:
                 ranked.append((matched / max(1, len(terms)), row))
         ranked.sort(key=lambda item: (-item[0], item[1].chunk_index))
-        return [
-            {
-                "content": row.content, "document_id": row.document_id, "filename": row.filename,
-                "source_type": row.source_type, "page": row.page, "paragraph": row.paragraph,
-                "char_start": row.char_start, "char_end": row.char_end, "similarity": score,
-                "citation_id": f"{row.document_id}:{row.chunk_index}",
-                "highlight_spans": _highlight_spans(row.content, query),
-            }
-            for score, row in ranked[:top_k]
-        ]
+        return [self._serialize_hit(row, score, query) for score, row in ranked[:top_k]]
+
+    @staticmethod
+    def _serialize_hit(row: KnowledgeChunk, similarity: float, query: str) -> dict:
+        return {
+            "content": row.content, "document_id": row.document_id, "filename": row.filename,
+            "source_type": row.source_type, "page": row.page, "paragraph": row.paragraph,
+            "char_start": row.char_start, "char_end": row.char_end, "similarity": similarity,
+            "citation_id": f"{row.document_id}:{row.chunk_index}",
+            "highlight_spans": _highlight_spans(row.content, query),
+        }

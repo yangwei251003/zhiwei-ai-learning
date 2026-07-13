@@ -11,6 +11,11 @@ class FailingEmbedding:
         raise RuntimeError("embedding service unavailable")
 
 
+class ConstantEmbedding:
+    def encode(self, texts):
+        return [[0.1] * 384 for _ in texts]
+
+
 def test_store_returns_tenant_scoped_lexical_hit_when_embedding_fails():
     from app.knowledge_base.supabase_store import SupabaseRAGStore
 
@@ -39,3 +44,24 @@ def test_store_returns_tenant_scoped_lexical_hit_when_embedding_fails():
 
     assert [hit["citation_id"] for hit in hits] == ["4:0"]
     assert hits[0]["similarity"] > 0
+
+
+def test_store_uses_lexical_fallback_on_sqlite_even_when_embeddings_exist():
+    from app.knowledge_base.supabase_store import SupabaseRAGStore
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    session.add(User(id=1, username="owner", hashed_password="x"))
+    session.add(KnowledgeDocument(id=4, user_id=1, course="Python", original_filename="variables.pdf", storage_name="owner.pdf", mime="application/pdf", size=3))
+    session.commit()
+    session.close()
+    store = SupabaseRAGStore(Session, ConstantEmbedding())
+    store.index_document(1, 4, "Python", "variables.pdf", [
+        TextChunk("Python variable types", "text", char_start=0, char_end=21),
+    ])
+
+    hits = store.search("Python variable", 1, "Python")
+
+    assert [hit["citation_id"] for hit in hits] == ["4:0"]
