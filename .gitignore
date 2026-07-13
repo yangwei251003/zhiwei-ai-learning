@@ -32,3 +32,6 @@ output/
 Thumbs.db
 .idea/
 .vscode/
+
+.vercel
+.env*
