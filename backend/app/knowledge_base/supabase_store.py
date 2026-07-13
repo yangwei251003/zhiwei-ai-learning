@@ -2,12 +2,29 @@
 
 from __future__ import annotations
 
+import re
+
 from sqlalchemy.orm import sessionmaker
 
 from app.knowledge_base.chunking import TextChunk
 from app.knowledge_base.embeddings import EmbeddingProtocol, validate_embeddings
-from app.knowledge_base.store import _highlight_spans
 from app.models import KnowledgeChunk
+
+
+def _highlight_spans(content: str, query: str) -> list[dict[str, int]]:
+    tokens: list[str] = []
+    seen: set[str] = set()
+    for token in re.findall(r"\w+", query, flags=re.UNICODE):
+        folded = token.casefold()
+        if folded and folded not in seen:
+            tokens.append(token)
+            seen.add(folded)
+    spans = {
+        (match.start(), match.end())
+        for token in tokens
+        for match in re.finditer(re.escape(token), content, flags=re.IGNORECASE)
+    }
+    return [{"start": start, "end": end} for start, end in sorted(spans)]
 
 
 class SupabaseRAGStore:
