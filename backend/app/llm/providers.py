@@ -75,8 +75,9 @@ class OpenAICompatibleProvider:
 
 
 class ProviderRouter:
-    def __init__(self, providers: Iterable[Any]) -> None:
+    def __init__(self, providers: Iterable[Any], first_token_timeout: float = 12.0) -> None:
         self.providers = list(providers)
+        self.first_token_timeout = first_token_timeout
         self.last_provider: str | None = None
 
     @property
@@ -91,7 +92,18 @@ class ProviderRouter:
             source = None
             try:
                 source = provider.stream(prompt, model)
-                async for chunk in source:
+                iterator = source.__aiter__()
+                try:
+                    async with asyncio.timeout(self.first_token_timeout):
+                        first_chunk = await anext(iterator)
+                except StopAsyncIteration:
+                    failures[name] = "empty response"
+                    continue
+
+                yielded = True
+                self.last_provider = name
+                yield first_chunk
+                async for chunk in iterator:
                     yielded = True
                     self.last_provider = name
                     yield chunk
