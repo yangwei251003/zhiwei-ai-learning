@@ -1,4 +1,6 @@
 from functools import lru_cache
+from pathlib import Path
+import tempfile
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Response, UploadFile
 from sqlalchemy.orm import Session
@@ -32,7 +34,7 @@ def get_knowledge_service() -> KnowledgeService:
         )
         return KnowledgeService(
             SupabaseRAGStore(SessionLocal, embedding),
-            settings.knowledge_upload_dir,
+            Path(tempfile.gettempdir()) / "zhiwei-knowledge-uploads",
             LLMDocumentSummarizer(),
             object_storage=storage,
         )
