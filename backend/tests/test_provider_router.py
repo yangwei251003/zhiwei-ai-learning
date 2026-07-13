@@ -20,6 +20,14 @@ class ScriptedProvider:
             yield item
 
 
+class SlowProvider:
+    name = "slow"
+
+    async def stream(self, prompt, model=None):
+        await __import__("asyncio").sleep(1)
+        yield "too late"
+
+
 @pytest.mark.asyncio
 async def test_router_falls_back_when_provider_fails_before_first_token():
     spark = ScriptedProvider("spark", [RuntimeError("quota exhausted")])
@@ -31,6 +39,17 @@ async def test_router_falls_back_when_provider_fails_before_first_token():
     assert chunks == ["免", "费"]
     assert router.last_provider == "zhipu-free"
     assert spark.calls == zhipu.calls == 1
+
+
+@pytest.mark.asyncio
+async def test_router_falls_back_when_provider_never_produces_a_first_token():
+    fallback = ScriptedProvider("fallback", ["可", "用"])
+    router = ProviderRouter([SlowProvider(), fallback], first_token_timeout=0.01)
+
+    chunks = [chunk async for chunk in router.stream("hello")]
+
+    assert chunks == ["可", "用"]
+    assert router.last_provider == "fallback"
 
 
 @pytest.mark.asyncio
