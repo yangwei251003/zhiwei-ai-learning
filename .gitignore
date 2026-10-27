@@ -1,0 +1,45 @@
+.worktrees/
+.superpowers/
+%USERPROFILE%/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Runtime data
+*.db
+*.sqlite3
+*.log
+chroma_db/
+
+# Frontend
+node_modules/
+dist/
+coverage/
+output/
+.vite/
+
+# Local configuration
+.env
+.env.*
+!.env.example
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+.vercel
+.env*
+
+# Local-only runtime state
+**/.stage*-server.json
+**/.workbuddy/
+**/knowledge_uploads/
+**/.env
+**/.env.*
+!**/.env.example

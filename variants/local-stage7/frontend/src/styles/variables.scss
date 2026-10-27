@@ -1,0 +1,35 @@
+:root {
+  color-scheme: light;
+  --color-canvas: #f6f8fc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #eef2f8;
+  --color-ink: #172033;
+  --color-ink-secondary: #536078;
+  --color-border: #d9e0ec;
+  --color-brand: #6366f1;
+  --color-brand-action: #5254d8;
+  --color-brand-hover: #4749c5;
+  --color-brand-soft: #e8e9ff;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-focus: #818cf8;
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --font-ui: "HarmonyOS Sans SC", "MiSans", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", monospace;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-canvas: #0b1020;
+  --color-surface: #121a2d;
+  --color-surface-muted: #18233a;
+  --color-ink: #f1f5fb;
+  --color-ink-secondary: #a9b5ca;
+  --color-border: #2a3650;
+  --color-brand-soft: #252953;
+}

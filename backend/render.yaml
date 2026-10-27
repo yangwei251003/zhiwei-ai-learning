@@ -1,0 +1,37 @@
+services:
+  - type: web
+    name: zhiwei-learning-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: RAG_BACKEND
+        value: supabase
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: knowledge-uploads
+      - key: SPARK_APP_ID
+        sync: false
+      - key: SPARK_API_KEY
+        sync: false
+      - key: SPARK_API_SECRET
+        sync: false
+      - key: ZHIPU_API_KEY
+        sync: false
+      - key: ANT_BAILING_API_KEY
+        sync: false
+      - key: AGNES_API_KEY
+        sync: false

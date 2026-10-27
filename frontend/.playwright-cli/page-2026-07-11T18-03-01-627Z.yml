@@ -1,0 +1,59 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img "小智析析" [ref=e6]
+      - generic [ref=e7]: 知微智学
+    - generic [ref=e8]: 学习工作台
+  - region "学习工作台" [ref=e10]:
+    - complementary [ref=e11]:
+      - paragraph [ref=e12]: 学习流程
+      - navigation "学习任务" [ref=e13]:
+        - button "01 诊断与画像" [ref=e14] [cursor=pointer]:
+          - generic [ref=e15]: "01"
+          - text: 诊断与画像
+        - button "02 知识星图" [ref=e16] [cursor=pointer]:
+          - generic [ref=e17]: "02"
+          - text: 知识星图
+        - button "03 学习路径" [ref=e18] [cursor=pointer]:
+          - generic [ref=e19]: "03"
+          - text: 学习路径
+      - generic [ref=e20]:
+        - paragraph [ref=e21]: 当前会话
+        - paragraph [ref=e24]: 准备建立学习画像
+        - paragraph [ref=e27]: 等待第一条学习输入
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - paragraph [ref=e31]: 小智析析正在待命
+          - heading "把每一次学习，变成看得见的星光" [level=1] [ref=e32]
+          - paragraph [ref=e33]: 从真实输入开始，建立可演化的学习画像与下一步路径。
+        - img "漂浮的小智析析" [ref=e34]
+      - generic [ref=e35]:
+        - generic [ref=e36]:
+          - generic [ref=e37]:
+            - generic [ref=e38]: 后端服务
+            - strong [ref=e39]: 等待检查
+          - button [ref=e40] [cursor=pointer]
+        - generic [ref=e45]: 等待连接
+    - complementary [ref=e46]:
+      - paragraph [ref=e47]: 学习画像
+      - generic [ref=e48]:
+        - img "微笑的小智析析" [ref=e49]
+        - generic [ref=e50]:
+          - strong [ref=e51]: 等待初始化
+          - paragraph [ref=e52]: 完成诊断后生成画像
+      - paragraph [ref=e53]: Agent 协作
+      - list [ref=e54]:
+        - listitem [ref=e55]:
+          - generic [ref=e56]: 画像构建 Agent
+          - emphasis [ref=e57]: 待命
+        - listitem [ref=e58]:
+          - generic [ref=e59]: 路径规划 Agent
+          - emphasis [ref=e60]: 待命
+        - listitem [ref=e61]:
+          - generic [ref=e62]: 资源生成 Agent
+          - emphasis [ref=e63]: 待命
+      - generic [ref=e64]:
+        - strong [ref=e65]: 每日挑战
+        - paragraph [ref=e66]: 完成第一条学习输入，点亮你的学习星图。
+        - generic "挑战进度 68%" [ref=e67]

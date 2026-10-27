@@ -1,0 +1,9 @@
+.git
+.venv
+frontend
+output
+backend/.env
+backend/chroma_db
+backend/knowledge_uploads
+backend/*.db
+backend/*.log
